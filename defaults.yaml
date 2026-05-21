@@ -1,0 +1,45 @@
+from: markdown+smart+table_captions+multiline_tables+yaml_metadata_block
+# from indica el formato del fichero de entrada "markdown" seguido de las extensiones que se le aplican:
+# Por ejemplo "smart" Convierte ciertas cadenas a su representación correcta: "---" -> em-dashes, "..." -> ellipsis, etc.
+# Más información sobre las distintas extensiones se puede encontrar en https://pandoc.org/MANUAL.html#extensions
+resource-path:
+  - .
+  - images
+  - ${.}/filters
+  - ${.}/images
+# "resource-path" indica a pandoc dónde buscar los recursos (imágenes, etc.)
+# ${.} se refiere al directorio donde se encuentra el fichero de entrada.
+# Estas interpolación SÓLO funciona para campos que aceptan listas de rutas, como "resource-path" o "include-in-header".
+template: eisvogel
+# "template" indica la plantilla a utilizar. Si no indicamos la ruta a un fichero usará la plantilla correspondiente
+# al formato al que estamos convirtiendo: pdf -> plantilla.latex, etc. (https://pandoc.org/demo/example33/6-templates.html)
+# Pandoc buscará las plantillas en:
+#  * Windows: "C:\Users\USERNAME\AppData\Roaming\pandoc\templates\"
+#  * Linux: "/Users/USERNAME/.local/share/pandoc/templates/" o "/Users/USERNAME/.pandoc/templates/"
+#
+#filters:
+#  - diagram
+#  - mermaid-filter
+# "filters" indica qué filtros se aplican al proceso de transformación del documento (https://pandoc.org/filters.html).
+# mermaid-filter interpreta los diagramas mermaid del documento markdown y los incluye en el pdf resultante.
+toc: true
+# "toc" indica que se genere o no una tabla de contenido.
+number-sections: true
+# "number-sections" asignará o no números a las secciones.
+columns: 72
+# "columns" está relacionado con "wrap" y tiene que ver con cómo se aplica wrap a las líneas en código fuente
+# generado (por ejemplo cuando convertimos a HTML). ¿Sin función cuando convertimos a pdf?
+syntax-highlighting: tango
+# "syntax-highlighting" indica qué estilo se aplica al resaltado de código fuente.
+# Para ver las opciones disponibles: pandoc --list-highlight-styles
+# Para GENERAR un json de uno de los estilos: pandoc -o mi_tema.json --print-highlight-style tango
+# Que podremos modificar y aplicar posteriormente: pandoc --syntax-highlighting mi_tema.json
+# El formato del json se puede consultar aquí: https://github.com/tajmone/pandoc-goodies/tree/master/skylighting/themes
+reference-links: true
+# Probando lo que hace, no lo tengo claro (cambia "inline links" a "reference links" en cosas como notas al pie)
+listings: true
+# "listings" indica si se ha de utilizar el paquete de latex (listings) o no: https://ctan.org/pkg/listings
+# Puede dar problemas si usamos caracteres utf8 en los listings.
+#
+pdf-engine: xelatex
+# "pdf-engine" indica qué comando usaremos para procesar el código latex generado por pandoc para generar el pdf final.
