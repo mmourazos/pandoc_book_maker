@@ -8,9 +8,9 @@ mainfont: "Noto Serif"
 
 # mainfont: "Auge-Trial"
 
-monofont: "Hack"
+# monofont: "Hack"
 
-# monofont: "Hack Nerd Font"
+monofont: "Hack Nerd Font"
 
 monofontoptions:
   - Scale=0.9
@@ -23,6 +23,7 @@ header-includes:
 - \newtcolorbox{myquote}{colback=red!5!white, colframe=red!75!black}
 - \renewenvironment{quote}{\begin{myquote}}{\end{myquote}}
 
+# Variables de la template eisvogel
 toc-own-page: true
 
 output:
@@ -62,7 +63,7 @@ Este protocolo usa un modelo de comunicación cliente-servidor, donde el cliente
 
 En el siguiente gráfico se muestra un ejemplo del uso del protocolo SMTP y su relación con IMAP y POP3 para el envío y recepción de correos electrónicos:
 
-![Diagrama de transmisión de un correo electrónico utilizando SMTP, IMAP y POP3](./imágenes/email-communication.png)
+![Diagrama de transmisión de un correo electrónico utilizando SMTP, IMAP y POP3](./images/email-communication.png)
 
 En el gráfico (_generado por copilot/dall-e_) se pueden observar los siguientes procesos:
 
@@ -163,3 +164,4 @@ Para utilizar una API RESTful, los clientes realizan solicitudes HTTP a un servi
 La API responderá mediante un HTTP response que incluirá un código de estado HTTP (como 200 OK, 404 Not Found, 500 Internal Server Error, etc.) y, en caso de éxito, el cuerpo de la respuesta contendrá los datos solicitados o una confirmación de la acción realizada, generalmente en formato JSON o XML.
 
 Aquí finalizamos con la parte teórica relacionada con el protocolo HTTP y los servicios web, así como con las API RESTful. En la parte práctica de esta unidad veremos cómo crear una API RESTful utilizando el framework GIN en Go, y cómo consumir esta API desde un cliente HTTP utilizando distintas herramientas y librerías.
+

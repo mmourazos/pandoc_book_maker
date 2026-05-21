@@ -8,12 +8,13 @@ mainfont: "Noto Serif"
 
 # mainfont: "Auge-Trial"
 
-monofont: "Hack"
+# monofont: "Hack"
 
-# monofont: "Hack Nerd Font"
+monofont: "Hack Nerd Font"
 
 monofontoptions:
   - Scale=0.9
+
 lang: es-ES
 
 header-includes:
@@ -22,6 +23,7 @@ header-includes:
 - \newtcolorbox{myquote}{colback=red!5!white, colframe=red!75!black}
 - \renewenvironment{quote}{\begin{myquote}}{\end{myquote}}
 
+# Variables de la template eisvogel
 toc-own-page: true
 
 output:
@@ -201,5 +203,4 @@ func main() {
 ```
 
 En el siguiente documento veremos cómo utilizar el paquete [go-mail](https://github.com/wneessen/go-mail) para realizar el envío de correos electrónicos de una forma más sencilla y con más funcionalidades que el paquete `net/smtp`. Este paquete es una biblioteca de terceros que proporciona una interfaz más amigable y fácil de usar para enviar correos electrónicos desde aplicaciones Go, permitiendo la configuración de encabezados, adjuntos, formatos de mensaje, entre otras características avanzadas.
-
 

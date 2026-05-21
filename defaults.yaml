@@ -17,11 +17,19 @@ template: eisvogel
 #  * Windows: "C:\Users\USERNAME\AppData\Roaming\pandoc\templates\"
 #  * Linux: "/Users/USERNAME/.local/share/pandoc/templates/" o "/Users/USERNAME/.pandoc/templates/"
 #
-#filters:
+variables:
+  titlepage: true
+  toc-own-page: true
+  title: "Servicios de red"
+  author: Manuel C. Piñeiro Mourazos
+  date: 2026-05-04
+
+filters:
+  - mermaid-filter.cmd
 #  - diagram
-#  - mermaid-filter
 # "filters" indica qué filtros se aplican al proceso de transformación del documento (https://pandoc.org/filters.html).
 # mermaid-filter interpreta los diagramas mermaid del documento markdown y los incluye en el pdf resultante.
+# Por algún motivo nunca encuentra el ejecutable "mermaid-filter". Aunque se encuentra en el path.
 toc: true
 # "toc" indica que se genere o no una tabla de contenido.
 number-sections: true
