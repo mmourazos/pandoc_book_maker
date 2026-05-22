@@ -23,7 +23,8 @@ func wrap(s string, w string) string {
 	return sb.String()
 }
 
-func buildMarkdownFiles(files []string) string {
+func buildMarkdownFiles(files []string) []string {
+	output := make([]string, 0, len(files))
 	sb := strings.Builder{}
 
 	for _, file := range files {
@@ -31,22 +32,20 @@ func buildMarkdownFiles(files []string) string {
 		sb.WriteString(" ")
 	}
 
-	return sb.String()
+	output = append(output, sb.String())
+
+	return output
 }
 
-func getMarkdownFiles(dir string, recursive bool, files *[]string) (*[]string, error) {
+func getMarkdownFiles(dir string, recursive bool, files *[]string) error {
 	fmt.Printf("Procesando directorio: %s\n", dir)
-	if files == nil {
-		slice := make([]string, 0, 128)
-		files = &slice
-	}
 
 	// DirEntry es una interfaz que representa una entrada en un directorio, que puede ser un archivo o un subdirectorio.
 	// Tiene los métodos Name(), IsDir(), Type()  y FileInfo() (que devuelve un FileInfo con información sobre el archivo o directorio).
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		log.Printf("Error al leer el directorio %s: %v", dir, err)
-		return nil, err
+		err = fmt.Errorf("error al leer el directorio %s: %v", dir, err)
+		return err
 	}
 
 	for _, entry := range entries {
@@ -54,7 +53,9 @@ func getMarkdownFiles(dir string, recursive bool, files *[]string) (*[]string, e
 			fmt.Printf("Procesando entrada de directorio: %s\n", entry.Name())
 			path := filepath.Join(dir, entry.Name())
 			fmt.Printf("Ruta generada para el directorio: %s\n", path)
-			getMarkdownFiles(path, recursive, files)
+			if err := getMarkdownFiles(path, recursive, files); err != nil {
+				return err
+			}
 		}
 
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
@@ -64,7 +65,7 @@ func getMarkdownFiles(dir string, recursive bool, files *[]string) (*[]string, e
 			*files = append(*files, path)
 		}
 	}
-	return files, nil
+	return nil
 }
 
 func main() {
@@ -75,32 +76,53 @@ func main() {
 	defaultsFile := flag.String("d", ".\\defaults.yaml", "El archivo de configuración de pandoc")
 	flag.Parse()
 
-	pwd, err := os.Getwd()
+	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Error al obtener el directorio de trabajo actual: %v", err)
 	}
 
-	fullRootDir := filepath.Join(pwd, *rootDir)
-	fmt.Printf("Ruta completa del directorio base: %s\n", fullRootDir)
+	fullDefaultsFile := filepath.Join(cwd, *defaultsFile)
+	_, err = os.Stat(fullDefaultsFile)
+	if err != nil {
+		log.Fatalf("Error archivo de configuración no encontrado: %v", err)
+	}
 
-	fullDefaultsFile := filepath.Join(pwd, *defaultsFile)
+	fullDefaultsFile = filepath.ToSlash(fullDefaultsFile)
+
+	// Aquí se construye la lista de argumentos para el comando pandoc.
+	args := make([]string, 0, 64)
+
+	fmt.Printf("Ruta completa al archivo de configuración: %s\n", fullDefaultsFile)
+	args = append(args, "-d", fullDefaultsFile)
+
+	fmt.Printf("Archivo de salida: %s\n", *outputFile)
+	args = append(args, "-o", *outputFile)
+
+	fullRootDir := filepath.Join(cwd, *rootDir)
 
 	fmt.Printf("Directorio base: %s\n", fullRootDir)
 	// Obtener los subdirectorios del directorio base.
 
-	mdFiles, err := getMarkdownFiles(fullRootDir, *recursive, nil)
-	if err != nil {
+	mdFiles := make([]string, 0, 128)
+	if err := getMarkdownFiles(fullRootDir, *recursive, &mdFiles); err != nil {
 		log.Fatalf("Error al obtener los archivos Markdown: %v", err)
 	}
 
-	for _, mdFile := range *mdFiles {
-		fmt.Printf("Archivo Markdown encontrado: %s\n", mdFile)
+	fmt.Printf("Número total de archivos Markdown encontrados: %d\n", len(mdFiles))
+	fmt.Printf("Archivos Markdown encontrados:\n")
+	for _, mdFile := range mdFiles {
+		fmt.Println(mdFile)
 	}
 
-	commandOpts := []string{fmt.Sprintf("-d %s", fullDefaultsFile), fmt.Sprintf("-o %s", *outputFile)}
-	commandOpts = append(commandOpts, buildMarkdownFiles(*mdFiles))
+	// args = append(args, buildMarkdownFiles(mdFiles)..)
+	args = append(args, mdFiles...)
 
-	cmd := exec.Command(pandocCommand, commandOpts...)
+	// cmd := exec.Command(pandocCommand, args...)
+
+	// Intentando usar una shell para no volverme loco.
+	// singleArg := strings.Join(args, " ")
+	// cmd := exec.Command("pwsh.exe", "/C", fmt.Sprintf("%s %s", pandocCommand, singleArg))
+	cmd := exec.Command(pandocCommand, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

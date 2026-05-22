@@ -48,6 +48,22 @@ variables:
   date: 2026-05-04
 ```
 
+### Fuentes
+
+En el documento de valores por defecto `defaults.yaml` se indican las fuentes a utilizar en el pdf generado. Estas son "Noto Serif" como fuente principal y "Hack Nerd Font" como fuente monoespaciada. Estas fuentes se pueden cambiar por otras que se tengan instaladas en el sistema, simplemente indicando su nombre en el fichero de configuración `defaults.yaml`. Por ejemplo, si se desea usar la fuente "Auge-Trial" como fuente principal, se indicaría de la siguiente forma:
+
+```yaml
+variables:
+  titlepage: true
+  toc-own-page: true
+
+# ...
+  mainfont: "Auge-Trial"
+  monofont: "Hack"
+```
+
+La fuente "Hack Nerd Font" se encuentra disponible en [nerd fonts](https://www.nerdfonts.com/font-downloads) o vía scoop instalando el buckete `nerd-fonts` con el comando `scoop bucket add nerd-fonts` y luego instalando la fuente con el comando `scoop install Hack-NF`.
+
 ## Comando Pandoc
 
 Determinar si se puede usar simplemente un comando de Pandoc para que genere un pdf a partir de múltiples fichero markdown.
@@ -69,7 +85,7 @@ Por defecto, Pandoc ya convierte múltiples ficheros markdown en un único pdf, 
 En primer lugar hay que aclarar que, aunque en este documento siempre hablemos de `defaults.yaml`, el nombre del fichero de configuración puede ser cualquiera, siempre y cuando se indique su ruta en el comando de Pandoc con el argumento `--defaults`. Por ejemplo, si el fichero de configuración se llama `config.yaml`, el comando de Pandoc sería:
 
 ```Powershell
-pandoc --defaults .\config.yaml -o book.pdf  '.\md_test_files\00 - Servicios de red.md' '.\md_test_files\01 - Email - SMTP.md' -F mermaid-filter.cmd
+pandoc --defaults .\config.yaml -o book.pdf  '.\md_test_files\00 - Servicios de red.md' '.\md_test_files\01 - Email - SMTP.md'
 ```
 
 El fichero `defaults.yaml` se usa para indicar a Pandoc que argumentos se desean aplicar ([documentación de Pandoc](https://pandoc.org/MANUAL.html#defaults-files)). Estos argumentos se podría indicar directamente en la línea de comandos pero, debido a la cantidad de comandos que vamos a usar, es más cómodo usar un fichero de configuración. Además, si se desea usar el mismo comando para generar el pdf a partir de diferentes ficheros markdown, es necesario usar un fichero de configuración para no tener que repetir los mismos argumentos una y otra vez.
@@ -79,3 +95,32 @@ En este fichero de configuración se pueden indicar en primer lugar todas las op
 ## Trabajo en progreso
 
 Por el momento hay valores que se indican en el preámbulo de los ficheros markdown pero la idea sería migrar estos valores al fichero de configuración `defaults.yaml` para no tener que repetirlos en cada uno de los ficheros markdown. Por ejemplo, el título del libro, el autor, la fecha, etc. Aún no tengo claro como pasar todos los valores (que no se apliquen específicamente a un documento) al `defaults.yaml` pero según lo vaya aclarando lo iré añadiendo a este documento.
+
+## Peculiaridades de la ejecución de pandoc desde Go (y otros lenguajes)
+
+Cuando intenté usar el método básico de ejecutar un comando de Pandoc desde Go, me encontré con el problema de que el comando no se ejecutaba correctamente. Esto se debía a que, al ejecutar el comando desde Go, el sistema no encontraba el filtro `mermaid-filter.cmd` ni la plantilla `eisvogel`, aunque ambos estuvieran instalados y funcionando correctamente cuando se ejecutaban directamente desde la línea de comandos.
+
+¡Ya funciona! Si el comando es: 
+
+```powershell
+pandoc --defaults .\defaults.yaml -o book.pdf  '.\md_test_files\00 - Servicios de red.md' '.\md_test_files\01 - Email - SMTP.md' -F mermaid-filter.cmd
+```
+
+El comando en Go debería de crearse de la siguiente forma:
+
+```go
+cmd := exec.Command("pandoc", "--defaults", "defaults.yaml", "-o", "book.pdf", "md_test_files/00 - Servicios de red.md", "md_test_files/01 - Email - SMTP.md")
+```
+
+Si por el contrario se crea el comando de la siguiente forma:
+
+```go
+cmd := exec.Command("pandoc",  "--defaults defaults.yaml", "-o book.pdf", "'md_test_files/00 - Servicios de red.md' 'md_test_files/01 - Email - SMTP.md' -F mermaid-filter.cmd")
+```
+
+Pandoc no entiende los argumentos y devuelve el error (poco legible): 
+
+```text
+pandoc.exe: 'C:\Users\USER\Docs\pandoc_book_maker\md_test_files\00 - Servicios de red.md' 'C:\Users\USER\Docs\pandoc_book_maker\md_test_files\01 - Email - SMTP.md' : withBinaryFile: invalid argument (Invalid argument)
+```
+
