@@ -13,6 +13,17 @@ import (
 
 const pandocCommand = "pandoc.exe"
 
+func filter(values []string, test func(string) bool) []string {
+	output := make([]string, 0, len(values))
+	for _, value := range values {
+		if test(value) {
+			output = append(output, value)
+		}
+	}
+
+	return output
+}
+
 func wrap(s string, w string) string {
 	sb := strings.Builder{}
 
@@ -23,19 +34,19 @@ func wrap(s string, w string) string {
 	return sb.String()
 }
 
-func buildMarkdownFiles(files []string) []string {
-	output := make([]string, 0, len(files))
-	sb := strings.Builder{}
-
-	for _, file := range files {
-		sb.WriteString(wrap(file, "'"))
-		sb.WriteString(" ")
-	}
-
-	output = append(output, sb.String())
-
-	return output
-}
+// func buildMarkdownFiles(files []string) []string {
+// 	output := make([]string, 0, len(files))
+// 	sb := strings.Builder{}
+//
+// 	for _, file := range files {
+// 		sb.WriteString(wrap(file, "'"))
+// 		sb.WriteString(" ")
+// 	}
+//
+// 	output = append(output, sb.String())
+//
+// 	return output
+// }
 
 func getMarkdownFiles(dir string, recursive bool, files *[]string) error {
 	fmt.Printf("Procesando directorio: %s\n", dir)
@@ -74,6 +85,12 @@ func main() {
 	recursive := flag.Bool("r", false, "Si se deben buscar archivos de forma recursiva")
 	outputFile := flag.String("o", "output.pdf", "El nombre del archivo de salida")
 	defaultsFile := flag.String("d", ".\\defaults.yaml", "El archivo de configuración de pandoc")
+
+	// Añadir dos opciones para filtrar nombres de ficheros md.
+	// Una para incluir sólo los ficheros que comiencen por un prefijo determinado y otra para incluir sólo los ficheros que contengan una cadena determinada en su nombre.
+	prefixFilter := flag.String("pf", "", "Incluir sólo los archivos Markdown que comiencen con este prefijo")
+	includeFilter := flag.String("if", "", "Incluir sólo los archivos Markdown que contengan esta cadena en su nombre")
+
 	flag.Parse()
 
 	cwd, err := os.Getwd()
@@ -113,6 +130,20 @@ func main() {
 	for _, mdFile := range mdFiles {
 		fmt.Println(mdFile)
 	}
+
+	// Filtrar los archivos Markdown según los filtros de prefijo e inclusión.
+	if *prefixFilter != "" {
+		mdFiles = filter(mdFiles, func(file string) bool {
+			return strings.HasPrefix(filepath.Base(file), *prefixFilter)
+		})
+	}
+
+	if *includeFilter != "" {
+		mdFiles = filter(mdFiles, func(file string) bool {
+			return strings.Contains(filepath.Base(file), *includeFilter)
+		})
+	}
+	
 
 	// args = append(args, buildMarkdownFiles(mdFiles)..)
 	args = append(args, mdFiles...)
