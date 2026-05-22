@@ -2,6 +2,8 @@ from: markdown+smart+table_captions+multiline_tables+yaml_metadata_block
 # from indica el formato del fichero de entrada "markdown" seguido de las extensiones que se le aplican:
 # Por ejemplo "smart" Convierte ciertas cadenas a su representación correcta: "---" -> em-dashes, "..." -> ellipsis, etc.
 # Más información sobre las distintas extensiones se puede encontrar en https://pandoc.org/MANUAL.html#extensions
+to: pdf
+# to indica el formato de salida deseado.
 resource-path:
   - .
   - images
@@ -23,6 +25,19 @@ variables:
   title: "Servicios de red"
   author: Manuel C. Piñeiro Mourazos
   date: 2026-05-04
+  geometry: margin=3cm
+  fontsize: 11pt
+
+  mainfont: "Noto Serif"
+  # mainfont: "Auge-Trial"
+  #
+  # monofont: "Hack"
+  monofont: "Hack Nerd Font"
+  
+  monofontoptions:
+     - Scale=0.9
+   
+  lang: es-ES
 
 filters:
   - mermaid-filter.cmd
@@ -43,11 +58,22 @@ syntax-highlighting: tango
 # Para GENERAR un json de uno de los estilos: pandoc -o mi_tema.json --print-highlight-style tango
 # Que podremos modificar y aplicar posteriormente: pandoc --syntax-highlighting mi_tema.json
 # El formato del json se puede consultar aquí: https://github.com/tajmone/pandoc-goodies/tree/master/skylighting/themes
+# Finalmente, es posible que la plantilla usada sobreescriba esta opción y aplique su propio estilo para los bloques de código.
 reference-links: true
-# Probando lo que hace, no lo tengo claro (cambia "inline links" a "reference links" en cosas como notas al pie)
+# Probando lo que hace, no lo tengo claro (cambia "inline links" a "reference links" en cosas como notas al pie).
 listings: true
 # "listings" indica si se ha de utilizar el paquete de latex (listings) o no: https://ctan.org/pkg/listings
 # Puede dar problemas si usamos caracteres utf8 en los listings.
 #
 pdf-engine: xelatex
 # "pdf-engine" indica qué comando usaremos para procesar el código latex generado por pandoc para generar el pdf final.
+# He decidido usar xelatex por la facilidad de ofrece para establecer las fuentes que deseamos utilizar.
+# Usar xelatex permite utilizar las opciones:
+# ---
+# mainfont: "Noto Serif"
+# monofont: "Hack Nerd Font"
+# 
+# monofontoptions:
+#   - Scale=0.9
+# ---
+# En el preámbulo de los documentos markdown.
